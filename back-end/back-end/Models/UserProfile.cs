@@ -7,14 +7,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace back_end.Models
 {
-    public class User
+    public class UserProfile
 
     {
         public int Id { get; set; }
-        public String Username { get; set; }
-        public String Password { get; set; }
-        public String Email { get; set; }
 
-        public UserProfile Profile { get; set; }
-   }
+        public String Bio { get; set; }
+        public String AvatarUrl { get; set; }
+        public String Birthday { get; set; }
+
+        public int UserId { get; set; }
+        public User User { get; set; }
+    }
 }
