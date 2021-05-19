@@ -16,6 +16,8 @@ using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
 using back_end.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.AspNetCore.Cors;
+using Newtonsoft.Json.Serialization;
 
 namespace back_end
 {
@@ -32,9 +34,18 @@ namespace back_end
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCors(c => {
+                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            });
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+                .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver()
+            );
             services.AddDbContext<EstatorDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-                }
+         }
+      
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -48,12 +59,22 @@ namespace back_end
 
             app.UseRouting();
 
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            // global cors policy
+            app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(x => x.MapControllers());
         }
     }
 }
